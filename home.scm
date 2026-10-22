@@ -11,6 +11,8 @@
 	     (sophia packages desktop)
 	     (gnu home services gnupg)
 	     (gnu home services ssh)
+	     (gnu home services sound)
+	     (gnu home services desktop)
              (gnu home services shells))
 
 (home-environment
@@ -25,6 +27,8 @@
    (append (list (service home-bash-service-type
                           (home-bash-configuration
 			    (guix-defaults? #t)))
+		 (service home-dbus-service-type)
+		 (service home-pipewire-service-type)
 		 (service home-ssh-agent-service-type)
 		 (service home-gpg-agent-service-type
 			  (home-gpg-agent-configuration

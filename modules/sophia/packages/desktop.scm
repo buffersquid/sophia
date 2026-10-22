@@ -3,9 +3,11 @@
   #:use-module (guix packages)
   #:use-module (guix build-system trivial)
   #:use-module (guix licenses)
+  #:use-module (gnu packages linux)
   #:use-module (gnu packages window-management)
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages terminals)
+  #:use-module (gnu packages music)
   #:use-module (nongnu packages nvidia))
 
 (define-public niri-desktop
@@ -21,7 +23,10 @@
      (list (replace-mesa niri #:driver nvda-580)
 	   noctalia-shell
 	   alacritty
-           fuzzel))
+           fuzzel
+	   wl-clipboard
+	   wireplumber
+	   playerctl))
     (synopsis "Niri Wayland desktop environment")
     (description
      "A practical desktop environment built around the Niri Wayland compositor and noctalia")
