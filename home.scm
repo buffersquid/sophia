@@ -1,34 +1,25 @@
-(use-modules (gnu home)
+(use-modules (guix gexp)
+             (gnu home)
              (gnu packages)
              (gnu services)
-             (guix gexp)
-             (gnu packages admin)
              (gnu packages vim)
              (gnu packages tmux)
-             (gnu packages window-management)
-             (gnu packages xdisorg)
-             (gnu packages terminals)
 	     (gnu packages ssh)
 	     (gnu packages gnupg)
              (nongnu packages mozilla)
              (nongnu packages nvidia)
+	     (sophia packages desktop)
 	     (gnu home services gnupg)
 	     (gnu home services ssh)
-             (gnu home services shells)
-             (gnu home services niri))
+             (gnu home services shells))
 
 (home-environment
-  ;; Home packages need the NVIDIA EGL/GBM libraries grafted too; the system
-  ;; NVIDIA transformation does not automatically rewrite Home package inputs.
-  (packages (list (replace-mesa niri #:driver nvda-580)
-		  noctalia-shell
+  (packages (list niri-desktop
 		  neovim
 		  tmux
 		  openssh
 		  gnupg
-		  fuzzel
-		  (replace-mesa firefox #:driver nvda-580)
-		  alacritty))
+		  (replace-mesa firefox #:driver nvda-580)))
 
   (services
    (append (list (service home-bash-service-type
