@@ -1,7 +1,6 @@
 (define-module (sophia packages desktop)
   #:use-module (guix gexp)
   #:use-module (guix packages)
-  #:use-module (guix packages)
   #:use-module (guix build-system trivial)
   #:use-module (guix licenses)
   #:use-module (gnu packages window-management)
