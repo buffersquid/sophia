@@ -13,6 +13,7 @@
              (nongnu packages mozilla)
              (nongnu packages nvidia)
 	     (gnu home services gnupg)
+	     (gnu home services ssh)
              (gnu home services shells)
              (gnu home services niri))
 
@@ -33,9 +34,10 @@
    (append (list (service home-bash-service-type
                           (home-bash-configuration
 			    (guix-defaults? #t)))
+		 (service home-ssh-agent-service-type)
 		 (service home-gpg-agent-service-type
 			  (home-gpg-agent-configuration
 			    (pinentry-program
 			      (file-append pinentry-qt "/bin/pinentry-qt"))
-			    (ssh-support? #t))))
+			    (ssh-support? #f))))
            %base-home-services)))
