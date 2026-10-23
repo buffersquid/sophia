@@ -1,8 +1,10 @@
 (use-modules (gnu)
+	     (gnu services)
 	     (nongnu packages linux)
 	     (nongnu packages nvidia)
 	     (nongnu system linux-initrd)
-	     (nonguix transformations))
+	     (nonguix transformations)
+	     (sophia config))
 (use-service-modules cups desktop networking ssh xorg security-token)
 
 (define nongnu-key (plain-file "non-guix.pub" "(public-key (ecc (curve Ed25519) (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))"))
@@ -15,6 +17,11 @@
   (host-name "sophia")
 
   (kernel linux)
+  (kernel-arguments
+    (append
+      (list "nvidia.NVreg_PreserveVideoMemoryAllocations=1"
+	    "nvidia.NVreg_UseKernelSuspendNotifiers=0")
+      %default-kernel-arguments))
   (initrd microcode-initrd)
   (firmware (list linux-firmware))
 
@@ -54,14 +61,17 @@
 				   (authorized-keys (list nongnu-key))))
 		 (service dhcpcd-service-type)
                  (service ntp-service-type)
-		 (service elogind-service-type)
+		 (service elogind-service-type
+			  (elogind-configuration
+			    (handle-power-key 'suspend)
+			    (system-sleep-hook-files
+			      (list (local-file "files/nvidia-sleep-hook")))))
 		 (service pcscd-service-type))
-           %base-services))
+	   %base-services))
 
   (packages %base-packages)))
 
 ;; The machine has a GeForce GTX 1650 (Turing).  Use the Nonguix NVIDIA
 ;; driver stack with DRM modesetting enabled for Wayland compositors such as
 ;; Niri.  This also blacklists Nouveau to avoid both drivers claiming the GPU.
-((nonguix-transformation-nvidia #:driver nvda-580)
- %base-os)
+((nonguix-transformation-nvidia #:driver %nvidia-driver) %base-os)

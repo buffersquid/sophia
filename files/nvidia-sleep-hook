@@ -1,0 +1,73 @@
+#!/bin/sh
+set -u
+
+PATH=/run/current-system/profile/bin:/run/current-system/profile/sbin
+export PATH
+
+RUN_DIR=/run/nvidia-elogind
+VT_FILE=$RUN_DIR/active-vt
+LOG=/run/nvidia-elogind-hook.log
+
+log() {
+    printf '%s\n' "$*" >> "$LOG"
+}
+
+restore_vt() {
+    if [ -f "$VT_FILE" ]; then
+        vt=$(cat "$VT_FILE") || return 1
+        rm -f "$VT_FILE"
+        chvt "$vt"
+    fi
+    return 0
+}
+
+case "${1-}/${2-}" in
+    pre/suspend)
+        log "pre/suspend started"
+
+        if ! mkdir -p "$RUN_DIR"; then
+            log "ERROR: mkdir failed"
+            exit 1
+        fi
+
+        if ! fgconsole > "$VT_FILE"; then
+            log "ERROR: fgconsole failed"
+            exit 1
+        fi
+
+        if ! chvt 63; then
+            log "ERROR: chvt 63 failed"
+            rm -f "$VT_FILE"
+            exit 1
+        fi
+
+        if printf '%s\n' suspend > /proc/driver/nvidia/suspend; then
+            log "NVIDIA accepted suspend"
+        else
+            rc=$?
+            log "ERROR: NVIDIA suspend write failed"
+            restore_vt || :
+            exit "$rc"
+        fi
+        ;;
+
+    post/suspend)
+        log "post/suspend started"
+
+        if printf '%s\n' resume > /proc/driver/nvidia/suspend; then
+            rc=0
+            log "NVIDIA accepted resume"
+        else
+            rc=$?
+            log "ERROR: NVIDIA resume write failed"
+        fi
+
+        if ! restore_vt; then
+            log "ERROR: restoring virtual terminal failed"
+            [ "$rc" -ne 0 ] || rc=1
+        fi
+
+        log "post/suspend finished"
+        exit "$rc"
+        ;;
+esac

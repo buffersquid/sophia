@@ -8,7 +8,8 @@
   #:use-module (gnu packages xdisorg)
   #:use-module (gnu packages terminals)
   #:use-module (gnu packages music)
-  #:use-module (nongnu packages nvidia))
+  #:use-module (nongnu packages nvidia)
+  #:use-module (sophia config))
 
 (define-public niri-desktop
   (package
@@ -20,7 +21,7 @@
      (list #:builder
            #~(mkdir #$output)))
     (propagated-inputs
-     (list (replace-mesa niri #:driver nvda-580)
+     (list (replace-mesa niri #:driver %nvidia-driver)
 	   noctalia-shell
 	   alacritty
            fuzzel

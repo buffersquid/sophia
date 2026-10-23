@@ -2,6 +2,7 @@
              (gnu home)
              (gnu packages)
              (gnu services)
+	     (sophia config)
              (gnu packages vim)
              (gnu packages tmux)
 	     (gnu packages ssh)
@@ -21,7 +22,7 @@
 		  tmux
 		  openssh
 		  gnupg
-		  (replace-mesa firefox #:driver nvda-580)))
+		  (replace-mesa firefox #:driver %nvidia-driver)))
 
   (services
    (append (list (service home-bash-service-type
