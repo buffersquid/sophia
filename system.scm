@@ -65,7 +65,7 @@
 			  (elogind-configuration
 			    (handle-power-key 'suspend)
 			    (system-sleep-hook-files
-			      (list (local-file "files/nvidia-sleep-hook")))))
+			      (list (local-file "files/scripts/nvidia-sleep-hook")))))
 		 (service pcscd-service-type))
 	   %base-services))
 
