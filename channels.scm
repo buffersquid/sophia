@@ -1,7 +1,7 @@
 (cons* (channel
         (name 'sophia)
         (url "https://github.com/buffersquid/sophia")
-	(branch "main")
+        (branch "main")
         (introduction
          (make-channel-introduction
           "4dcbd0dbc0fefe6d5ac1bf3fe1b2ef1f72816048"

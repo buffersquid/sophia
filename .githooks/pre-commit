@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+# Avoid accidentally committing pre-existing unstaged edits.
+if ! git diff --quiet; then
+    echo "pre-commit: unstaged tracked changes detected." >&2
+    echo "Please stage or stash them before committing." >&2
+    exit 1
+fi
+
+echo "Running formatter..."
+./scripts/format
+
+echo "Staging formatting changes..."
+git add -u
