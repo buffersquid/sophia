@@ -11,6 +11,7 @@
              (nongnu packages mozilla)
              (nongnu packages nvidia)
              (sophia packages desktop)
+             (sophia packages music)
              (gnu home services gnupg)
              (gnu home services ssh)
              (gnu home services sound)
@@ -24,7 +25,8 @@
                  tmux
                  openssh
                  gnupg
-                 (replace-mesa firefox #:driver %nvidia-driver)))
+                 (replace-mesa firefox #:driver %nvidia-driver)
+		 spotify))
 
  (services
   (append (list (service home-bash-service-type
