@@ -13,4 +13,4 @@ link:
 	@./scripts/link-configs
 
 format:
-	@./scripts/format-scheme
+	@./scripts/format
