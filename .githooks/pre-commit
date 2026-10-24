@@ -3,15 +3,23 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-# Avoid accidentally committing pre-existing unstaged edits.
+# Don't risk overwriting or mixing in existing unstaged changes.
 if ! git diff --quiet; then
-    echo "pre-commit: unstaged tracked changes detected." >&2
-    echo "Please stage or stash them before committing." >&2
+    echo "pre-commit: unstaged changes detected; commit aborted." >&2
     exit 1
 fi
 
 echo "Running formatter..."
 ./scripts/format
 
-echo "Staging formatting changes..."
-git add -u
+# Require review whenever formatting modifies tracked files.
+if ! git diff --quiet; then
+    echo >&2
+    echo "pre-commit: formatting changed files; commit aborted." >&2
+    git --no-pager diff --name-only >&2
+    echo >&2
+    echo "Review changes, run your build/tests, then stage and commit again." >&2
+    exit 1
+fi
+
+echo "Formatting clean. Continuing commit."
