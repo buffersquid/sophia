@@ -6,10 +6,6 @@ die() {
     exit 1
 }
 
-# Check dependencies.
-command -v guix >/dev/null 2>&1 ||
-    die "Guix is not installed or not on PATH."
-
 # Resolve the repository root, regardless of the caller's cwd.
 repo_root="$(
     cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." &&
@@ -17,16 +13,36 @@ repo_root="$(
 )"
 cd -- "$repo_root"
 
-# Build the formatter once.
-printf 'Building guile-schemefmt...\n'
+# Find or build the formatter.
+if command -v guix >/dev/null 2>&1; then
+    printf 'Building guile-schemefmt with Guix...\n'
 
-if ! formatter_store="$(
-    guix build -L "$repo_root/modules" guile-schemefmt
-)"; then
-    die "Failed to build guile-schemefmt."
+    if ! formatter_store="$(
+        guix build -L "$repo_root/modules" guile-schemefmt
+    )"; then
+        die "Failed to build guile-schemefmt with Guix."
+    fi
+
+    formatter="$formatter_store/bin/schemefmt"
+
+elif command -v schemefmt >/dev/null 2>&1; then
+    formatter="$(command -v schemefmt)"
+    printf 'Using installed schemefmt: %s\n' "$formatter"
+
+else
+    cat >&2 <<'EOF'
+format-scheme: error: no formatter found.
+
+Neither Guix nor the schemefmt binary is available.
+
+To fix this, either:
+  - Install Guix so this script can build guile-schemefmt.
+  - Install the schemefmt binary and ensure it is on your PATH.
+
+Then rerun scripts/format.
+EOF
+    exit 1
 fi
-
-formatter="$formatter_store/bin/schemefmt"
 
 [[ -x "$formatter" ]] ||
     die "Formatter not found or not executable: $formatter"
@@ -43,11 +59,14 @@ mapfile -d '' -t scheme_files < <(
 changed=()
 
 for file in "${scheme_files[@]}"; do
-    before=$(sha256sum < "$file") || die "Failed to hash $file"
+    before=$(sha256sum < "$file") ||
+        die "Failed to hash $file"
 
-    "$formatter" -w "$file" || die "Formatting failed: $file"
+    "$formatter" -w "$file" ||
+        die "Formatting failed: $file"
 
-    after=$(sha256sum < "$file") || die "Failed to hash $file"
+    after=$(sha256sum < "$file") ||
+        die "Failed to hash $file"
 
     if [[ "$before" != "$after" ]]; then
         changed+=("$file")
