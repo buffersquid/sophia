@@ -26,7 +26,7 @@
                  openssh
                  gnupg
                  (replace-mesa firefox #:driver %nvidia-driver)
-		 spotify))
+                 spotify))
 
  (services
   (append (list (service home-bash-service-type
