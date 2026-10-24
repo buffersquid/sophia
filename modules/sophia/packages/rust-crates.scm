@@ -192,7 +192,6 @@
                 "04k1w1mq9f4cxv520dbr5xw1i7xkbc9fcrvaggyjy25jdkdvl038"))
 
 (define rust-linux-raw-sys-0.12.1
-  ;; TODO REVIEW: Check bundled sources.
   (crate-source "linux-raw-sys" "0.12.1"
                 "0lwasljrqxjjfk9l2j8lyib1babh2qjlnhylqzl01nihw14nk9ij"))
 
@@ -425,12 +424,10 @@
                 "0r9w2z96d5phmm185aq92z54jp9h2nqisa4wgc71idxbc436rr25"))
 
 (define rust-windows-sys-0.59.0
-  ;; TODO REVIEW: Check bundled sources.
   (crate-source "windows-sys" "0.59.0"
                 "0fw5672ziw8b3zpmnbp9pdv1famk74f1l9fcbc3zsrzdg56vqf0y"))
 
 (define rust-windows-sys-0.61.0
-  ;; TODO REVIEW: Check bundled sources.
   (crate-source "windows-sys" "0.61.0"
                 "1ajpwsmzfcsa1r7i0dxzvfn24dp3525rcd7aq95ydvdj8171h0g2"))
 
