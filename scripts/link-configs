@@ -6,8 +6,14 @@ repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 source_root="$repo_root/dotfiles"
 config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 
+# Validate required sources before making any changes.
 if [[ ! -d "$source_root" ]]; then
-    echo "Error: missing config directory: $source_root" >&2
+    printf 'Error: missing config directory: %s\n' "$source_root" >&2
+    exit 1
+fi
+
+if [[ ! -f "$repo_root/channels.scm" ]]; then
+    printf 'Error: missing channels.scm: %s\n' "$repo_root/channels.scm" >&2
     exit 1
 fi
 
@@ -17,61 +23,81 @@ declare -a backups=()
 declare -a links=()
 declare -a conflicts=()
 
-while IFS= read -r -d '' source; do
-    name="${source##*/}"
-    target="$config_home/$name"
+link_path() {
+    local src="$1"
+    local dst="$2"
+    local resolved backup stamp n
 
-    # Preserve symlinks, but verify they point to our source.
-    if [[ -L "$target" ]]; then
-        resolved="$(realpath -e -- "$target" 2>/dev/null || true)"
+    # Ensure the destination directory exists.
+    if ! mkdir -p -- "$(dirname -- "$dst")"; then
+        printf 'Error: could not create parent directory for %s\n' "$dst" >&2
+        conflicts+=("$dst")
+        return 0
+    fi
 
-        if [[ "$resolved" == "$source" ]]; then
-            links+=("$target")
+    # Preserve existing symlinks, but verify their destination.
+    if [[ -L "$dst" ]]; then
+        resolved="$(realpath -e -- "$dst" 2>/dev/null || true)"
+
+        if [[ "$resolved" == "$src" ]]; then
+            links+=("$dst")
         else
-            echo "Conflict: $target -> $(readlink -- "$target")" >&2
-            echo "  Leaving existing symlink untouched."
-            conflicts+=("$target")
+            printf 'Conflict: %s -> %s\n' "$dst" "$(readlink -- "$dst")" >&2
+            printf '  Leaving existing symlink untouched.\n' >&2
+            conflicts+=("$dst")
         fi
-        continue
+        return 0
     fi
 
     # Back up existing files or directories before replacing them.
-    if [[ -e "$target" ]]; then
-        backup="$target.bak"
+    if [[ -e "$dst" ]]; then
+        backup="$dst.bak"
 
         # Never overwrite an existing backup.
         if [[ -e "$backup" || -L "$backup" ]]; then
             stamp="$(date +%Y%m%d-%H%M%S)"
-            backup="$target.bak.$stamp"
+            backup="$dst.bak.$stamp"
             n=1
 
             while [[ -e "$backup" || -L "$backup" ]]; do
-                backup="$target.bak.$stamp.$n"
+                backup="$dst.bak.$stamp.$n"
                 n=$((n + 1))
             done
         fi
 
-        if mv -T -- "$target" "$backup"; then
+        if mv -T -- "$dst" "$backup"; then
             backups+=("$backup")
         else
-            echo "Error: could not back up $target" >&2
-            conflicts+=("$target")
-            continue
+            printf 'Error: could not back up %s\n' "$dst" >&2
+            conflicts+=("$dst")
+            return 0
         fi
     fi
 
-    if ln -s -- "$source" "$target"; then
-        links+=("$target")
+    # Create the symlink. -T prevents treating an existing directory
+    # at the destination as a directory to link into.
+    if ln -sT -- "$src" "$dst"; then
+        links+=("$dst")
     else
-        echo "Error: could not create symlink $target" >&2
-        conflicts+=("$target")
+        printf 'Error: could not create symlink %s\n' "$dst" >&2
+        conflicts+=("$dst")
     fi
+}
+
+# Link every top-level application config directory.
+while IFS= read -r -d '' source; do
+    name="${source##*/}"
+    link_path "$source" "$config_home/$name"
 done < <(
     find "$source_root" -mindepth 1 -maxdepth 1 \
         -type d -print0 | sort -z
 )
 
-printf '\nSymlinks:\n'
+# Link the Guix channel configuration explicitly.
+link_path "$repo_root/channels.scm" "$config_home/guix/channels.scm"
+
+# Print the resulting symlinks.
+printf '\nManaged symlinks:\n'
 for target in "${links[@]}"; do
     if [[ -L "$target" ]]; then
         printf '  %s -> %s\n' "$target" "$(readlink -- "$target")"
@@ -80,12 +106,16 @@ done
 
 printf '\nBackups created:\n'
 if ((${#backups[@]} == 0)); then
-    echo "  (none)"
+    printf '  (none)\n'
 else
     printf '  %s\n' "${backups[@]}"
 fi
 
+# Report conflicts after attempting all mappings.
 if ((${#conflicts[@]} > 0)); then
-    printf '\nCompleted with %d conflict(s).\n' "${#conflicts[@]}" >&2
+    printf '\nCompleted with %d conflict(s):\n' "${#conflicts[@]}" >&2
+    printf '  %s\n' "${conflicts[@]}" >&2
     exit 1
 fi
+
+printf '\nAll symlinks are configured successfully.\n'
