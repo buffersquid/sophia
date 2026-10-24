@@ -4,7 +4,8 @@
   #:use-module (guix download)
   #:use-module (guix git-download)
   #:use-module (guix build-system cargo)
-  #:use-module ((guix licenses) #:prefix license:)
+  #:use-module ((guix licenses)
+                #:prefix license:)
   #:use-module (sophia packages rust-crates)
   #:use-module (gnu packages rust)
   #:export (kdlfmt))
@@ -15,13 +16,13 @@
    (version "0.1.7")
    (source
     (origin
-     (method url-fetch)
-     (uri (string-append
-           "https://github.com/hougesen/kdlfmt/archive/refs/tags/v"
-           version ".tar.gz"))
-     (file-name (string-append name "-" version ".tar.gz"))
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/hougesen/kdlfmt")
+           (commit (string-append "v" version))))
+     (file-name (git-file-name name version))
      (sha256
-      (base32 "107w10zsvh6kjc87i7qzqds4cbzraizac8gc5cvvgy1a71ylilx3"))))
+      (base32 "16321b0ilzjr08a4a85r0bw3jmma1hanfff5ld7rn4rv0bidzp0n"))))
    (build-system cargo-build-system)
    (arguments
     (list
@@ -34,11 +35,9 @@
                                  (lambda _
                                    (for-each delete-file
                                              (find-files "guix-vendor"
-                                                         "\\.(a|dll|dylib|exe|lib|o|so)$"))
-                                   #t)))))
-   (inputs
-    (cargo-inputs 'kdlfmt
-                  #:module '(sophia packages rust-crates)))
+                                                         "\\.(a|dll|dylib|exe|lib|o|so)$")) #t)))))
+   (inputs (cargo-inputs 'kdlfmt
+                         #:module '(sophia packages rust-crates)))
    (home-page "https://github.com/hougesen/kdlfmt")
    (synopsis "KDL document formatter")
    (description
