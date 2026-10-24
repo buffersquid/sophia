@@ -34,12 +34,31 @@ formatter="$formatter_store/bin/schemefmt"
 # Format every Scheme file, excluding Git repositories.
 printf 'Formatting Scheme files...\n'
 
-if ! find . \
-    -type d -name .git -prune -o \
-    -type f -name '*.scm' \
-    -exec "$formatter" -w {} \;
-then
-    die "Formatting failed."
+mapfile -d '' -t scheme_files < <(
+    find . \
+        -type d -name .git -prune -o \
+        -type f -name '*.scm' -print0
+)
+
+changed=()
+
+for file in "${scheme_files[@]}"; do
+    before=$(sha256sum < "$file") || die "Failed to hash $file"
+
+    "$formatter" -w "$file" || die "Formatting failed: $file"
+
+    after=$(sha256sum < "$file") || die "Failed to hash $file"
+
+    if [[ "$before" != "$after" ]]; then
+        changed+=("$file")
+    fi
+done
+
+if ((${#changed[@]})); then
+    printf 'Formatted:\n'
+    printf '  %s\n' "${changed[@]}"
+else
+    printf 'No files needed formatting.\n'
 fi
 
 printf 'Formatting complete.\n'
