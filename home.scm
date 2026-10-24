@@ -6,6 +6,7 @@
              (gnu packages vim)
              (gnu packages tmux)
 	     (gnu packages ssh)
+	     (gnu packages version-control)
 	     (gnu packages gnupg)
              (nongnu packages mozilla)
              (nongnu packages nvidia)
@@ -18,6 +19,7 @@
 
 (home-environment
   (packages (list niri-desktop
+		  git
 		  neovim
 		  tmux
 		  openssh
