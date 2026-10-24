@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Resolve paths relative to this script, not the current directory.
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+source_root="$repo_root/files/config"
+config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+if [[ ! -d "$source_root" ]]; then
+    echo "Error: missing config directory: $source_root" >&2
+    exit 1
+fi
+
+mkdir -p -- "$config_home"
+
+declare -a backups=()
+declare -a links=()
+declare -a conflicts=()
+
+while IFS= read -r -d '' source; do
+    name="${source##*/}"
+    target="$config_home/$name"
+
+    # Preserve symlinks, but verify they point to our source.
+    if [[ -L "$target" ]]; then
+        resolved="$(realpath -e -- "$target" 2>/dev/null || true)"
+
+        if [[ "$resolved" == "$source" ]]; then
+            links+=("$target")
+        else
+            echo "Conflict: $target -> $(readlink -- "$target")" >&2
+            echo "  Leaving existing symlink untouched."
+            conflicts+=("$target")
+        fi
+        continue
+    fi
+
+    # Back up existing files or directories before replacing them.
+    if [[ -e "$target" ]]; then
+        backup="$target.bak"
+
+        # Never overwrite an existing backup.
+        if [[ -e "$backup" || -L "$backup" ]]; then
+            stamp="$(date +%Y%m%d-%H%M%S)"
+            backup="$target.bak.$stamp"
+            n=1
+
+            while [[ -e "$backup" || -L "$backup" ]]; do
+                backup="$target.bak.$stamp.$n"
+                n=$((n + 1))
+            done
+        fi
+
+        if mv -T -- "$target" "$backup"; then
+            backups+=("$backup")
+        else
+            echo "Error: could not back up $target" >&2
+            conflicts+=("$target")
+            continue
+        fi
+    fi
+
+    if ln -s -- "$source" "$target"; then
+        links+=("$target")
+    else
+        echo "Error: could not create symlink $target" >&2
+        conflicts+=("$target")
+    fi
+done < <(
+    find "$source_root" -mindepth 1 -maxdepth 1 \
+        -type d -print0 | sort -z
+)
+
+printf '\nSymlinks:\n'
+for target in "${links[@]}"; do
+    if [[ -L "$target" ]]; then
+        printf '  %s -> %s\n' "$target" "$(readlink -- "$target")"
+    fi
+done
+
+printf '\nBackups created:\n'
+if ((${#backups[@]} == 0)); then
+    echo "  (none)"
+else
+    printf '  %s\n' "${backups[@]}"
+fi
+
+if ((${#conflicts[@]} > 0)); then
+    printf '\nCompleted with %d conflict(s).\n' "${#conflicts[@]}" >&2
+    exit 1
+fi
