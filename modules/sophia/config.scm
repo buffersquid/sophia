@@ -2,4 +2,5 @@
   #:use-module (nongnu packages nvidia)
   #:export (%nvidia-driver))
 
-(define %nvidia-driver nvda-595)
+(define %nvidia-driver
+  nvda-595)

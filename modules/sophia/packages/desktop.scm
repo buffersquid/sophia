@@ -13,23 +13,25 @@
 
 (define-public niri-desktop
   (package
-   (name "niri-desktop")
-   (version "1.0")
-   (source #f)
-   (build-system trivial-build-system)
-   (arguments
-    (list #:builder
-          #~(mkdir #$output)))
-   (propagated-inputs
-    (list (replace-mesa niri #:driver %nvidia-driver)
-          noctalia-shell
-          alacritty
-          fuzzel
-          wl-clipboard
-          wireplumber
-          playerctl))
-   (synopsis "Niri Wayland desktop environment")
-   (description
-    "A practical desktop environment built around the Niri Wayland compositor and noctalia")
-   (home-page "https://github.com/buffersquid/sophia")
-   (license gpl3+)))
+    (name "niri-desktop")
+    (version "1.0")
+    (source
+     #f)
+    (build-system trivial-build-system)
+    (arguments
+     (list
+      #:builder
+      #~(mkdir #$output)))
+    (propagated-inputs (list (replace-mesa niri
+                                           #:driver %nvidia-driver)
+                             noctalia-shell
+                             alacritty
+                             fuzzel
+                             wl-clipboard
+                             wireplumber
+                             playerctl))
+    (synopsis "Niri Wayland desktop environment")
+    (description
+     "A practical desktop environment built around the Niri Wayland compositor and noctalia")
+    (home-page "https://github.com/buffersquid/sophia")
+    (license gpl3+)))

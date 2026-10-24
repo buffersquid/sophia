@@ -19,25 +19,26 @@
              (gnu home services shells))
 
 (home-environment
- (packages (list niri-desktop
-                 git
-                 neovim
-                 tmux
-                 openssh
-                 gnupg
-                 (replace-mesa firefox #:driver %nvidia-driver)
-                 spotify))
+  (packages (list niri-desktop
+                  git
+                  neovim
+                  tmux
+                  openssh
+                  gnupg
+                  (replace-mesa firefox
+                                #:driver %nvidia-driver)
+                  spotify))
 
- (services
-  (append (list (service home-bash-service-type
-                         (home-bash-configuration
-                          (guix-defaults? #t)))
-                (service home-dbus-service-type)
-                (service home-pipewire-service-type)
-                (service home-ssh-agent-service-type)
-                (service home-gpg-agent-service-type
-                         (home-gpg-agent-configuration
-                          (pinentry-program
-                           (file-append pinentry-qt "/bin/pinentry-qt"))
-                          (ssh-support? #f))))
-          %base-home-services)))
+  (services
+   (append (list (service home-bash-service-type
+                          (home-bash-configuration
+                           (guix-defaults? #t)))
+                 (service home-dbus-service-type)
+                 (service home-pipewire-service-type)
+                 (service home-ssh-agent-service-type)
+                 (service home-gpg-agent-service-type
+                          (home-gpg-agent-configuration (pinentry-program (file-append
+                                                                           pinentry-qt
+                                                                           "/bin/pinentry-qt"))
+                                                        (ssh-support? #f))))
+           %base-home-services)))

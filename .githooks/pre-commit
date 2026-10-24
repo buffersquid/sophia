@@ -9,8 +9,14 @@ if ! git diff --quiet; then
     exit 1
 fi
 
-echo "Running formatter..."
-./scripts/format
+echo "Running Guix formatter..."
+
+# Collect tracked Scheme files, preserving paths with whitespace.
+mapfile -d '' scheme_files < <(git ls-files -z -- '*.scm')
+
+if ((${#scheme_files[@]})); then
+    guix style --whole-file "${scheme_files[@]}"
+fi
 
 # Require review whenever formatting modifies tracked files.
 if ! git diff --quiet; then
