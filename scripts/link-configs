@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Resolve paths relative to this script, not the current directory.
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-source_root="$repo_root/files/config"
+source_root="$repo_root/dotfiles"
 config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 if [[ ! -d "$source_root" ]]; then
