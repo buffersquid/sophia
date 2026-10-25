@@ -8,6 +8,7 @@
              (gnu packages ssh)
              (gnu packages version-control)
              (gnu packages gnupg)
+             (gnu packages game-development)
              (nongnu packages mozilla)
              (nongnu packages nvidia)
              (sophia packages desktop)
@@ -27,6 +28,7 @@
                   gnupg
                   (replace-mesa firefox
                                 #:driver %nvidia-driver)
+                  openmw
                   spotify))
 
   (services
