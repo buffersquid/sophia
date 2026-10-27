@@ -1,3 +1,4 @@
-vim.opt.clipboard = 'unnamedplus'
-vim.opt.relativenumber = true
-vim.opt.number = true
+require("config.autocmds")
+require("config.keymaps")
+require("config.lsp")
+require("config.options")
