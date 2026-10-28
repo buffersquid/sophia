@@ -13,6 +13,7 @@
              (nongnu packages nvidia)
              (sophia packages desktop)
              (sophia packages music)
+             (sophia packages game-runtime)
              (gnu home services gnupg)
              (gnu home services ssh)
              (gnu home services sound)
@@ -28,6 +29,7 @@
                   gnupg
                   (replace-mesa firefox
                                 #:driver %nvidia-driver)
+                  wine-game-runner
                   openmw
                   spotify))
 

@@ -6,6 +6,7 @@
   #:use-module (gnu packages linux)
   #:use-module (gnu packages window-management)
   #:use-module (gnu packages xdisorg)
+  #:use-module (gnu packages xorg)
   #:use-module (gnu packages terminals)
   #:use-module (gnu packages music)
   #:use-module (nongnu packages nvidia)
@@ -23,6 +24,8 @@
       #:builder
       #~(mkdir #$output)))
     (propagated-inputs (list (replace-mesa niri
+                                           #:driver %nvidia-driver)
+                             (replace-mesa xwayland-satellite
                                            #:driver %nvidia-driver)
                              noctalia-shell
                              alacritty
