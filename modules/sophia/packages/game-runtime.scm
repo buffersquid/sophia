@@ -77,8 +77,7 @@ exec wine \"$EXE\" \"$@\"
     (inputs (list bash-minimal))
 
     (propagated-inputs (list (replace-mesa wine
-                                           #:driver %nvidia-driver)
-                             %nvidia-driver))
+                                           #:driver %nvidia-driver)))
 
     (home-page "https://github.com/buffersquid/sophia")
     (synopsis "Launch Windows games with Wine")

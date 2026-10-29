@@ -73,7 +73,14 @@
                                                    (system-sleep-hook-files (list
                                                                              (local-file
                                                                               "files/scripts/nvidia-sleep-hook")))))
-                   (service pcscd-service-type)) %base-services))
+                   (service pcscd-service-type)
+                   (simple-service 'x11-unix-directory activation-service-type
+                                   #~(begin
+                                       (use-modules (guix build utils))
+                                       (mkdir-p "/tmp/.X11-unix")
+                                       (chown "/tmp/.X11-unix" 0 0)
+                                       (chmod "/tmp/.X11-unix" #o1777))))
+             %base-services))
 
     (packages %base-packages)))
 
